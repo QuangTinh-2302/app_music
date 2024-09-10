@@ -1,9 +1,16 @@
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UiProvider extends ChangeNotifier{
   bool _isDark = false;
   bool get isDark => _isDark;
+
+  String _languageCode = 'en';
+  String get languageCode => _languageCode;
+
+  String _notification='';
+  String get notification => _notification;
 
   late SharedPreferences storage;
 
@@ -27,10 +34,25 @@ class UiProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  void changeLanguage(String languageCode) {
+    _languageCode = languageCode;
+    storage.setString('_languageCode', _languageCode);
+    notifyListeners();
+  }
+
+  void setNotification(String newNotification) {
+    if (_notification != newNotification) {
+      _notification = newNotification;
+      notifyListeners();
+    }
+  }
+
   //init method
   init() async{
     storage = await SharedPreferences.getInstance();
     _isDark = storage.getBool('_isDark') ?? false;
+    _languageCode = storage.getString('_languageCode') ?? 'en';
+
     notifyListeners();
   }
 }

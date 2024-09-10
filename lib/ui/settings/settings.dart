@@ -11,14 +11,14 @@ class SettingsTab extends StatelessWidget {
   }
 }
 class _SettingTab extends StatefulWidget {
-  const _SettingTab({super.key});
+  const _SettingTab();
 
   @override
   State<_SettingTab> createState() => _SettingTabState();
 }
 
 class _SettingTabState extends State<_SettingTab> {
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,10 +32,32 @@ class _SettingTabState extends State<_SettingTab> {
             children: [
               ListTile(
                 leading: const Icon(Icons.dark_mode),
-                title: const Text('Chế độ tối'),
+                title: const Text('Dark Mode'),
                 trailing: Switch(
                     value: notifier.isDark,
                     onChanged: (value) => notifier.changeTheme()
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: const Text('Language'),
+                trailing: DropdownButton<String>(
+                  value: notifier.languageCode,
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      notifier.changeLanguage(newValue);
+                    }
+                  },
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'en',
+                      child: Text('English'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'vi',
+                      child: Text('Tiếng Việt'),
+                    ),
+                  ],
                 ),
               )
             ],

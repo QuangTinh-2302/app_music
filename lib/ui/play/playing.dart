@@ -1,19 +1,18 @@
 import 'dart:math';
-
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-
 import '../../data/model/songs.dart';
+import '../../provider/provider.dart';
 import 'audio_player_manager.dart';
+import 'package:provider/provider.dart';
 
 class NowPlaying extends StatelessWidget {
   const NowPlaying({super.key, required this.playingSong, required this.songs});
 
   final Song playingSong;
   final List<Song> songs;
-
   @override
   Widget build(BuildContext context) {
     return NowPlayingPage(playingSong: playingSong, songs: songs);
@@ -55,6 +54,7 @@ class _NowplayingPageState extends State<NowPlayingPage>
     }
     _selectedItemIndex = widget.songs.indexOf(_song);
     _autoNext();
+    Provider.of<UiProvider>(context, listen: false).setNotification(_song.id);
   }
 
   void _autoNext(){
@@ -71,12 +71,14 @@ class _NowplayingPageState extends State<NowPlayingPage>
     const delta = 100;
     final radius = (screenWidth - delta) / 2;
     return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: const Text('NowPlaying'),
-          trailing:
-              IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-        ),
         child: Scaffold(
+          appBar: AppBar(
+            title: const Text('NowPlaying'),
+            centerTitle: true,
+            actions: [
+              IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+            ]
+          ),
           body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -132,7 +134,7 @@ class _NowplayingPageState extends State<NowPlayingPage>
                                             .textTheme
                                             .bodyMedium!
                                             .color,
-                                        fontSize: 20),
+                                        fontSize: 17),
                               ),
                               const SizedBox(
                                 height: 10,
