@@ -1,3 +1,4 @@
+import 'package:app_music/provider/provider.dart';
 import 'package:app_music/ui/discovery/discovery.dart';
 import 'package:app_music/ui/home/viewmodel.dart';
 import 'package:app_music/ui/play/audio_player_manager.dart';
@@ -5,22 +6,28 @@ import 'package:app_music/ui/settings/settings.dart';
 import 'package:app_music/ui/user/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
 import '../../data/model/songs.dart';
 import '../play/playing.dart';
-
 class MusicApp extends StatelessWidget {
   const MusicApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Music App',
-      theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent)),
-      home: const MusicHomePage(),
-      debugShowCheckedModeBanner: false,
+    return ChangeNotifierProvider(
+      create: (BuildContext context) => UiProvider()..init(),
+      child: Consumer<UiProvider>(
+        builder: (context,UiProvider notifier,child) {
+          return MaterialApp(
+            themeMode: notifier.isDark ? ThemeMode.dark : ThemeMode.light,
+            darkTheme: notifier.isDark ? notifier.darkTheme : notifier.lightTheme,
+            theme: ThemeData(
+                useMaterial3: true,
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent)),
+            home: const MusicHomePage(),
+            debugShowCheckedModeBanner: false,
+          );
+        }
+      ),
     );
   }
 }
@@ -43,9 +50,6 @@ class _MusicHomePageState extends State<MusicHomePage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('MusicApp'),
-        ),
         child: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             items: const [
@@ -88,16 +92,14 @@ class _HomeTabPageState extends State<HomeTabPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     _viewModel = MusicAppViewModel();
     _viewModel.loadSong();
-    obsereveData();
+    obServeData();
     super.initState();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _viewModel.songstream.close();
     AudioPlayerManager().dispose();
     super.dispose();
@@ -106,13 +108,17 @@ class _HomeTabPageState extends State<HomeTabPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('MusicApp'),
+        centerTitle: true,
+      ),
       body: getBody(),
     );
   }
 
   Widget getBody() {
-    bool showloading = songs.isEmpty;
-    if (showloading) {
+    bool showLoading = songs.isEmpty;
+    if (showLoading) {
       return getProgressBar();
     } else {
       return getListView();
@@ -147,7 +153,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
     return _SongItemSelection(parent: this,song: songs[index],);
   }
 
-  void obsereveData() {
+  void obServeData() {
     _viewModel.songstream.stream.listen((songList) {
       setState(() {
         songs.addAll(songList);
@@ -161,7 +167,6 @@ class _HomeTabPageState extends State<HomeTabPage> {
         child: Container(
           height: 400,
           width: double.infinity,
-          color: Colors.white,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,

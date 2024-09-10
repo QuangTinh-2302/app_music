@@ -30,7 +30,7 @@ class NowPlayingPage extends StatefulWidget {
   @override
   State<NowPlayingPage> createState() => _NowplayingPageState();
 }
-
+LoopMode _loopMode = LoopMode.off;
 class _NowplayingPageState extends State<NowPlayingPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _imageAnimationController;
@@ -39,7 +39,6 @@ class _NowplayingPageState extends State<NowPlayingPage>
   late Song _song;
   double _currentAnimationPosition = 0.0;
   bool _isShuffle = false;
-  late LoopMode _loopMode;
 
   @override
   void initState() {
@@ -55,16 +54,17 @@ class _NowplayingPageState extends State<NowPlayingPage>
       _audioPlayerManager.prepare(isNewSong: false);
     }
     _selectedItemIndex = widget.songs.indexOf(_song);
-    _loopMode = LoopMode.off;
     _autoNext();
   }
+
   void _autoNext(){
     _audioPlayerManager.player.processingStateStream.listen((state){
       if(state == ProcessingState.completed){
-        setNextSong();
+        _setNextSong();
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -138,7 +138,7 @@ class _NowplayingPageState extends State<NowPlayingPage>
                                 height: 10,
                               ),
                               Text(
-                                widget.playingSong.artist,
+                                _song.artist,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium!
@@ -173,7 +173,6 @@ class _NowplayingPageState extends State<NowPlayingPage>
         )
     );
   }
-
   @override
   void dispose() {
     _imageAnimationController.dispose();
@@ -187,6 +186,9 @@ class _NowplayingPageState extends State<NowPlayingPage>
           final progress = durationState?.progress ?? Duration.zero;
           final buffer = durationState?.buffered ?? Duration.zero;
           final total = durationState?.total ?? Duration.zero;
+          // if(_loopMode == LoopMode.all && progress >= total && total != Duration.zero){
+          //   _setNextSong();
+          // }
           return ProgressBar(
             progress: progress,
             total: total,
@@ -243,7 +245,7 @@ class _NowplayingPageState extends State<NowPlayingPage>
     );
   }
 
-  void setNextSong(){
+  void _setNextSong(){
     if(_isShuffle){
       var random = Random();
       _selectedItemIndex = random.nextInt(widget.songs.length);
@@ -288,6 +290,9 @@ class _NowplayingPageState extends State<NowPlayingPage>
     });
   }
   void _playRotationAmin(){
+    // WidgetsBinding.instance.addPostFrameCallback((_){
+    //   if (!_imageAnimationController.isAnimating) {}
+    // });
     _imageAnimationController.forward(from: _currentAnimationPosition);
     _imageAnimationController.repeat();
   }
@@ -351,7 +356,7 @@ class _NowplayingPageState extends State<NowPlayingPage>
           MediaButtonControl(function: _setShuffle, icon: Icons.shuffle, color: _getShuffleColor(), size: 24),
           MediaButtonControl(function: _setPrevSong, icon: Icons.skip_previous, color: Theme.of(context).colorScheme.primary, size: 36),
           _playButton(),
-          MediaButtonControl(function: setNextSong, icon: Icons.skip_next, color: Theme.of(context).colorScheme.primary, size: 36),
+          MediaButtonControl(function: _setNextSong, icon: Icons.skip_next, color: Theme.of(context).colorScheme.primary, size: 36),
           MediaButtonControl(function: _setRepeatOption, icon: _repetingIcon(), color: _getRepeatingIconColor(), size: 24),
         ],
       ),
